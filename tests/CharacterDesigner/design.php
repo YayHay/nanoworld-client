@@ -43,7 +43,8 @@ unset($files[0], $files[1]);
 		<style>
 			img {
 				cursor: pointer;
-				width:64px;
+				width: 64px;
+				border: 1px solid #BBB;
 			}
 		</style>
 	</head>
@@ -58,7 +59,20 @@ unset($files[0], $files[1]);
 		<button onclick="spawnMany(100)">Spawn 100</button>
 		<button onclick="fpstest()">FPS Test</button>
 		<div id="selection">
+			<div id="hair">
+				Hair
+<?php
+foreach($files as $file) {
+	if(strpos($file, 'hair') !== false && strpos($file, 'png') !== false) {
+?>
+				<img onclick="part('hair', <?php echo substr($file, 4, -4); ?>)" src="./images/<?php echo $file; ?>" />
+<?php
+	}
+}
+?>
+			</div>
 			<div id="eyes">
+				Eyes
 <?php
 foreach($files as $file) {
 	if(strpos($file, 'eyes') !== false && strpos($file, 'png') !== false) {
@@ -70,6 +84,7 @@ foreach($files as $file) {
 ?>
 			</div>
 			<div id="mouth">
+				Mouth
 <?php
 foreach($files as $file) {
 	if(strpos($file, 'mouth') !== false && strpos($file, 'png') !== false) {
