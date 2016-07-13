@@ -16,12 +16,18 @@ var Nano = {
 	imdat: {},
 	res: "./",
 	world: {},
+	view: {
+		x: 0,
+		y: 0
+	},
 	
 	init: function(canvas, fps, res) {
 		Nano.context = canvas.getContext("2d");
 		Nano.canvas = canvas;
 		Nano.fps = typeof fps === "undefined" ? 30 : fps;
 		Nano.res = typeof res === "string" ? res : "./";
+		
+		Nano.view.x = canvas.width / 2;
 		
 		setInterval(Nano.render, 1000 / Nano.fps);
 		setInterval(function() {
@@ -146,15 +152,15 @@ var Nano = {
 		}
 	},
 	World: {
-		loadTestWorld: function() {
-			Nano.xhr("GET", "./worlds/test.json", "", function(d) {
+		load: function(name) {
+			Nano.xhr("GET", "./worlds/" + name + ".json", "", function(d) {
 				Nano.world = JSON.parse(d);
 			});
 		}
 	},
 	Draw: {
 		clear: function() {
-			//Nano.canvas.width = Nano.canvas.width;
+			Nano.canvas.width = Nano.canvas.width;
 			Nano.context.fillStyle = "white";
 			Nano.context.fillRect(0, 0, Nano.canvas.width, Nano.canvas.height);
 		},
@@ -190,24 +196,33 @@ var Nano = {
 		ground: function() {
 			var ctx = Nano.context;
 			
-			var cs = Math.cos(45), sn = Math.sin(45);
+			/*var cs = Math.cos(45), sn = Math.sin(45);
 			var h = Math.cos(20);
 			var a = 1*cs, b = -1*sn, c = 200;
-			var d = h*1*sn, e = h*1*cs, f = 200;
-			ctx.setTransform(a, d, b, e, c, f);
+			var d = h*1*sn, e = h*1*cs, f = 200;*/
+			//ctx.setTransform(a, d, b, e, c, f);
+			
+			ctx.save();
+			ctx.translate(Nano.view.x, Nano.view.y);
+			ctx.scale(1, 0.5);
+			ctx.rotate(45 * Math.PI /180);
 			
 			var scale = 0.25, interval = 128;
 			if(typeof Nano.world.name === "string") {
 				for(var x = 0; x < Nano.world.width; x++) {
 					for(var y = 0; y < Nano.world.height; y++) {
 						Nano.Draw.image(Nano.getImage(Nano.world.textures[Nano.world.data.ground[y][x]]), 0, interval*x, interval*y, 0, 0, false, scale);
+						//Nano.context.font = "24px sans-serif";
+						//ctx.fillText(x + ", " + y, interval*x, interval*y);
 					}
 				}
 			}
+			
+			ctx.restore();
 			//Nano.Draw.image(Nano.getImage("texture.grass"), 0, -128, 0, 0, 0, false, 0.25);
 			//Nano.Draw.image(Nano.getImage("texture.walkway"), 0, 0, 0, 0, 0, false, 0.25);
 			
-			ctx.setTransform(1, 0, 0, 1, 0, 0);
+			//ctx.setTransform(1, 0, 0, 1, 0, 0);
 		},
 		character: function(name) {
 			var chr = Nano.characters[name],

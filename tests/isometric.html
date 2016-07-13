@@ -19,7 +19,7 @@
 				canvas.height = window.innerHeight;
 				
 				Nano.init(canvas);
-				Nano.World.loadTestWorld();
+				Nano.World.load("hub");
 				Nano.Characters.create("Test", {body: 1, head: 1, eyes: 1, mouth: 1, hair: 1, arms: 1, legs: 1}, [], [125, 125], 1);
 			};
 			window.addEventListener('resize', function() {
