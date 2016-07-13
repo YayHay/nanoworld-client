@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>World</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<script src="nanorender.js"></script>
+		<style>
+			body, html {
+				margin: 0;
+				padding: 0;
+				overflow: hidden;
+			}
+		</style>
+		<script>
+			var canvas;
+			window.onload = function() {
+				canvas = document.getElementById("canvas");
+				canvas.width = window.innerWidth;
+				canvas.height = window.innerHeight;
+				
+				Nano.init(canvas);
+				Nano.World.loadTestWorld();
+				Nano.Characters.create("Test", {body: 1, head: 1, eyes: 1, mouth: 1, hair: 1, arms: 1, legs: 1}, [], [125, 125], 1);
+			};
+			window.addEventListener('resize', function() {
+				canvas.width = window.innerWidth;
+				canvas.height = window.innerHeight;
+			}, true);
+		</script>
+	</head>
+	
+	<body>
+		<canvas id="canvas"></canvas>
+	</body>
+</html>

@@ -15,6 +15,7 @@ var Nano = {
 	images: {},
 	imdat: {},
 	res: "./",
+	world: {},
 	
 	init: function(canvas, fps, res) {
 		Nano.context = canvas.getContext("2d");
@@ -36,6 +37,8 @@ var Nano = {
 	render: function() {
 		Nano.Draw.clear();
 		
+		Nano.Draw.ground();
+		
 		if(Object.keys(Nano.characters).length > 0) {
 			var sort = [];
 			for(var name in Nano.characters) {
@@ -49,8 +52,8 @@ var Nano = {
 			}
 		}
 		
-		Nano.context.font = "12px sans-serif";
-		Nano.context.fillText(Nano.currFps + "fps/" + Object.keys(Nano.characters).length + "e", 10, 20);
+		//Nano.context.font = "12px sans-serif";
+		//Nano.context.fillText(Nano.currFps + "fps/" + Object.keys(Nano.characters).length + "e", 10, 20);
 		
 		Nano.framesDrawn++;
 	},
@@ -142,6 +145,13 @@ var Nano = {
 			delete Nano.characters[name];
 		}
 	},
+	World: {
+		loadTestWorld: function() {
+			Nano.xhr("GET", "./worlds/test.json", "", function(d) {
+				Nano.world = JSON.parse(d);
+			});
+		}
+	},
 	Draw: {
 		clear: function() {
 			//Nano.canvas.width = Nano.canvas.width;
@@ -163,17 +173,41 @@ var Nano = {
 			Nano.context.fill();
 			Nano.context.closePath();
 		},
-		image: function(image, angle, positionX, positionY, axisX, axisY, flip) {
-			if(angle == 0 && !flip)
+		image: function(image, angle, positionX, positionY, axisX, axisY, flip, scale) {
+			if(angle == 0 && !flip && !scale)
 				return Nano.context.drawImage(image, positionX - axisX, positionY - axisY);
 			var angleInRad = Math.PI / 180 * angle;
 			Nano.context.translate(positionX, positionY);
 			Nano.context.rotate(angleInRad);
 			if(flip) Nano.context.scale(-1, 1);
+			Nano.context.scale(scale || 1, scale || 1);
 			Nano.context.drawImage(image, -axisX, -axisY);
+			Nano.context.scale(1/scale || 1, 1/scale || 1);
 			if(flip) Nano.context.scale(-1, 1);
 			Nano.context.rotate(-angleInRad);
 			Nano.context.translate(-positionX, -positionY);
+		},
+		ground: function() {
+			var ctx = Nano.context;
+			
+			var cs = Math.cos(45), sn = Math.sin(45);
+			var h = Math.cos(20);
+			var a = 1*cs, b = -1*sn, c = 200;
+			var d = h*1*sn, e = h*1*cs, f = 200;
+			ctx.setTransform(a, d, b, e, c, f);
+			
+			var scale = 0.25, interval = 128;
+			if(typeof Nano.world.name === "string") {
+				for(var x = 0; x < Nano.world.width; x++) {
+					for(var y = 0; y < Nano.world.height; y++) {
+						Nano.Draw.image(Nano.getImage(Nano.world.textures[Nano.world.data.ground[y][x]]), 0, interval*x, interval*y, 0, 0, false, scale);
+					}
+				}
+			}
+			//Nano.Draw.image(Nano.getImage("texture.grass"), 0, -128, 0, 0, 0, false, 0.25);
+			//Nano.Draw.image(Nano.getImage("texture.walkway"), 0, 0, 0, 0, 0, false, 0.25);
+			
+			ctx.setTransform(1, 0, 0, 1, 0, 0);
 		},
 		character: function(name) {
 			var chr = Nano.characters[name],
