@@ -1,0 +1,22 @@
+{
+	"torso": {
+		"leftArm": {
+			"prop": {}
+		},
+		"rightArm": {
+			"prop": {}
+		},
+		"head": {
+			"hair": {
+				"hat": {}
+			},
+			"eyes": {},
+			"mouth": {},
+			"ears": {}
+		},
+		"legs": {
+			"pants": {},
+			"shoes": {}
+		},
+	}
+}
