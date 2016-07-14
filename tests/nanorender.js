@@ -199,6 +199,7 @@ var Nano = {
 						var o = Math.sin(millis/100)*45;
 						
 						c.rotation.leg = [o, -o];
+						c.rotation.arm = [-o, o];
 						
 						requestAnimationFrame(step);
 					};
@@ -207,6 +208,7 @@ var Nano = {
 				} else {
 					Nano.characters[name].animation = 0;
 					Nano.characters[name].rotation.leg = [0, 0];
+					Nano.characters[name].rotation.arm = [0, 0];
 				}
 			}
 		}
@@ -376,12 +378,12 @@ var Nano = {
 				
 			if(f > 0) {
 				//LeftArm
-				Nano.Draw.image(ir, f*-5 + f*i,
+				Nano.Draw.image(ir, f*-5 + f*i + chr.rotation.arm[0],
 					chr.pos[0] + (ib.width*s/3), chr.pos[1] - (ib.height*s/2) + 10,
 					ir.width*s/2, ir.width*s/2, f < 0, s);
 			} else {
 				//RightArm
-				Nano.Draw.image(ir, f*(5 - i),
+				Nano.Draw.image(ir, f*5 - f*i + chr.rotation.arm[1],
 					chr.pos[0] - (ib.width*s/3), chr.pos[1] - (ib.height*s/2) + 10,
 					(dr.axis[0]*f || 16), (dr.axis[1]*f || 16), f < 0, s);
 			}
@@ -403,12 +405,12 @@ var Nano = {
 				
 			if(f < 0) {
 				//LeftArm
-				Nano.Draw.image(ir, f*-5 + f*i,
+				Nano.Draw.image(ir, f*-5 + f*i + chr.rotation.arm[0],
 					chr.pos[0] + (ib.width*s/3), chr.pos[1] - (ib.height*s/2) + 10,
 					ir.width*s/2, ir.width*s/2, f < 0, s);
 			} else {
 				//RightArm
-				Nano.Draw.image(ir, f*(5 - i),
+				Nano.Draw.image(ir, f*5 - f*i + chr.rotation.arm[1],
 					chr.pos[0] - (ib.width*s/3), chr.pos[1] - (ib.height*s/2) + 10,
 					(dr.axis[0]*f || 16), (dr.axis[1]*f || 16), f < 0, s);
 			}
