@@ -122,10 +122,15 @@ var Nano = {
 		set: function(name, parts, traits, pos, facing) {
 			Nano.characters[name] = {
 				parts: parts,
+				rotation: {
+					leg: [0, 0],
+					arm: [0, 0]
+				},
 				traits: traits,
 				pos: pos,
 				facing: (facing || 1),
-				animation: 0
+				animation: 0,
+				animating: false
 			};
 			return true;
 		},
@@ -154,7 +159,7 @@ var Nano = {
 		destroy: function(name) {
 			delete Nano.characters[name];
 		},
-		animate: function(name, axis, val, duration) {
+		moveTo: function(name, axis, val, duration) {
 			// The calculations required for the step function
 			var start = new Date().getTime();
 			var end = start + duration;
@@ -171,10 +176,38 @@ var Nano = {
 
 				// If the animation hasn't finished, repeat the step.
 				if (progress < 1) requestAnimationFrame(step);
+				else Nano.Characters.Animate.walk(name, false);
 			};
 
 			// Start the animation
+			Nano.Characters.Animate.walk(name, true);
 			return step();
+		},
+		Animate: {
+			walk: function(name, enable) {
+				Nano.characters[name].animating = enable;
+				if(enable) {
+					var step = function() {
+						var c = Nano.characters[name];
+						if(!c.animating) return;
+						
+						var millis = new Date().getTime() % 10000;
+						
+						var o = Math.sin(millis/100)*45;
+						
+						c.rotation.leg = [o, -o];
+						
+						console.log(o);
+						
+						requestAnimationFrame(step);
+					};
+					
+					return step();
+				} else {
+					Nano.characters[name].animation = 0;
+					Nano.characters[name].rotation.leg = [0, 0];
+				}
+			}
 		}
 	},
 	World: {
@@ -249,6 +282,15 @@ var Nano = {
 			//Nano.Draw.image(Nano.getImage("texture.walkway"), 0, 0, 0, 0, 0, false, 0.25);
 			
 			//ctx.setTransform(1, 0, 0, 1, 0, 0);
+		},
+		cross: function(x, y) {
+			var c = Nano.context;
+			c.beginPath();
+			c.moveTo(0, y);
+			c.lineTo(Nano.canvas.width, y);
+			c.moveTo(x, 0);
+			c.lineTo(x, Nano.canvas.height);
+			c.stroke();
 		},
 		character: function(name) {
 			var chr = Nano.characters[name],
@@ -344,7 +386,7 @@ var Nano = {
 			}
 			
 			//Legs
-			Nano.Draw.image(il, 0,
+			Nano.Draw.image(il, 0 + chr.rotation.leg[0],
 				chr.pos[0] + (ib.width*s/2) - (f < 0 ? 10 : 0), chr.pos[1] + (ib.height*s/2) - (il.height*s*1/3),
 				il.width/2, 0, f < 0, s);
 				
@@ -354,7 +396,7 @@ var Nano = {
 				ib.width/2, ib.height/2, f < 0, s);
 				
 			//Legs
-			Nano.Draw.image(il, 0,
+			Nano.Draw.image(il, 0 + chr.rotation.leg[1],
 				chr.pos[0] - (ib.width*s/2) + (f > 0 ? 10 : 0), chr.pos[1] + (ib.height*s/2) - (il.height*s*1/3),
 				il.width/2, 0, f < 0, s);
 				
@@ -377,8 +419,10 @@ var Nano = {
 				
 			//Eyes
 			Nano.Draw.image(iy, i/2*f,
-				chr.pos[0] + iy.width*s*f, chr.pos[1] - (ih.height*s/6) + i,
-				iy.width*s/2, ih.height*s/2, f < 0, (dy.scale || 1));
+				chr.pos[0] + iy.width*s*f + (dy.pos[0]*f || 0), chr.pos[1] - (ih.height*s/6) + (dy.pos[1] || 0) + i,
+				iy.width*s/2 + (dy.axis[0]*f || 0), ih.height*s/2 + (dy.axis[1] || 0), f < 0, (dy.scale || 1));
+				
+			//Nano.Draw.cross(chr.pos[0] + iy.width*s*f - iy.width*s/2, chr.pos[1] - (ih.height*s/6) + i - ih.height*s/2);
 				
 			//Mouth
 			Nano.Draw.image(im, i/2*f,
