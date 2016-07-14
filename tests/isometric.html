@@ -28,6 +28,15 @@
 				
 				Nano.Characters.moveTo("Test", 0, window.innerWidth / 2, 1000);
 				Nano.Characters.moveTo("Test", 1, window.innerHeight / 2, 1000);
+				
+				canvas.addEventListener('click', function(event) {
+					var rect = canvas.getBoundingClientRect();
+					var x = event.clientX - rect.left;
+					var y = event.clientY - rect.top;
+					
+					Nano.Characters.moveTo("Test", 0, x, 1000);
+					Nano.Characters.moveTo("Test", 1, y, 1000);
+				});
 			};
 			window.addEventListener('resize', function() {
 				canvas.width = window.innerWidth;

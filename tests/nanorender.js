@@ -165,6 +165,9 @@ var Nano = {
 			var end = start + duration;
 			var current = Nano.characters[name].pos[axis];
 			var distance = val - current;
+			
+			if(axis == 0)
+				Nano.Characters.face(name, val < Nano.characters[name].pos[0] ? -1 : 1);
 
 			var step = function() {
 				// Get our current progres
@@ -180,6 +183,7 @@ var Nano = {
 			};
 
 			// Start the animation
+			Nano.Characters.Animate.walk(name, false);
 			Nano.Characters.Animate.walk(name, true);
 			return step();
 		},
@@ -192,12 +196,9 @@ var Nano = {
 						if(!c.animating) return;
 						
 						var millis = new Date().getTime() % 10000;
-						
 						var o = Math.sin(millis/100)*45;
 						
 						c.rotation.leg = [o, -o];
-						
-						console.log(o);
 						
 						requestAnimationFrame(step);
 					};
