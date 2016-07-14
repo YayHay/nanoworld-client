@@ -10,6 +10,10 @@
 				padding: 0;
 				overflow: hidden;
 			}
+			#canvas {
+				width: 100vw;
+				height: 100vh;
+			}
 		</style>
 		<script>
 			var canvas;
@@ -21,6 +25,9 @@
 				Nano.init(canvas);
 				Nano.World.load("hub");
 				Nano.Characters.create("Test", {body: 1, head: 1, eyes: 1, mouth: 1, hair: 1, arms: 1, legs: 1}, [], [125, 125], 1);
+				
+				Nano.Characters.animate("Test", 0, window.innerWidth / 2, 1000);
+				Nano.Characters.animate("Test", 1, window.innerHeight / 2, 1000);
 			};
 			window.addEventListener('resize', function() {
 				canvas.width = window.innerWidth;

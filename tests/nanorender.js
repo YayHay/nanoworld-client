@@ -28,8 +28,10 @@ var Nano = {
 		Nano.res = typeof res === "string" ? res : "./";
 		
 		Nano.view.x = canvas.width / 2;
+		Nano.context.imageSmoothingEnabled = true;
 		
-		setInterval(Nano.render, 1000 / Nano.fps);
+		//setInterval(Nano.render, 1000 / Nano.fps);
+		window.requestAnimationFrame(Nano.render);
 		setInterval(function() {
 			Nano.GlobalState.state += (Nano.GlobalState.state < Nano.fps*2 ? 1 : -Nano.fps*2);
 			Nano.GlobalState.idle = Math.abs(Nano.GlobalState.state - Nano.fps) / 8;
@@ -62,6 +64,7 @@ var Nano = {
 		//Nano.context.fillText(Nano.currFps + "fps/" + Object.keys(Nano.characters).length + "e", 10, 20);
 		
 		Nano.framesDrawn++;
+		window.requestAnimationFrame(Nano.render);
 	},
 	
 	getImage: function(name) {
@@ -82,7 +85,7 @@ var Nano = {
 				if(data !== false)
 					Nano.imdat[name] = JSON.parse(data);
 				else
-					Nano.imdat[name] = {pos:[0,0],axis:[0,0]};
+					Nano.imdat[name] = {pos:[0,0],axis:[0,0],scale:1};
 			});
 		}
 		return Nano.imdat[name];
@@ -150,6 +153,28 @@ var Nano = {
 		},
 		destroy: function(name) {
 			delete Nano.characters[name];
+		},
+		animate: function(name, axis, val, duration) {
+			// The calculations required for the step function
+			var start = new Date().getTime();
+			var end = start + duration;
+			var current = Nano.characters[name].pos[axis];
+			var distance = val - current;
+
+			var step = function() {
+				// Get our current progres
+				var timestamp = new Date().getTime();
+				var progress = Math.min((duration - (end - timestamp)) / duration, 1);
+
+				// Update the square's property
+				Nano.characters[name].pos[axis] = current + (distance * progress);
+
+				// If the animation hasn't finished, repeat the step.
+				if (progress < 1) requestAnimationFrame(step);
+			};
+
+			// Start the animation
+			return step();
 		}
 	},
 	World: {
@@ -162,8 +187,8 @@ var Nano = {
 	Draw: {
 		clear: function() {
 			Nano.canvas.width = Nano.canvas.width;
-			Nano.context.fillStyle = "white";
-			Nano.context.fillRect(0, 0, Nano.canvas.width, Nano.canvas.height);
+			//Nano.context.fillStyle = "white";
+			//Nano.context.fillRect(0, 0, Nano.canvas.width, Nano.canvas.height);
 		},
 		ellipse: function(centerX, centerY, width, height, color) {
 			Nano.context.beginPath();
@@ -229,6 +254,7 @@ var Nano = {
 			var chr = Nano.characters[name],
 				i = Nano.GlobalState.idle,
 				f = chr.facing,
+				s = 0.25,
 				
 				//Image
 				il = Nano.getImage("legs" + (chr.parts.legs || 1)),
@@ -249,52 +275,120 @@ var Nano = {
 				dm = Nano.getImageData("mouth" + (chr.parts.mouth || 1));
 				
 			//Shadow
-			Nano.Draw.ellipse(chr.pos[0], chr.pos[1] + ib.height/2 + il.height - 10, ih.width + 30, 8, "rgba(0,0,0,0.7)");
+			Nano.Draw.ellipse(chr.pos[0], chr.pos[1] + ib.height*s/2 + il.height*s - (il.height*s*1/3), ih.width*s + 30, 8, "rgba(0,0,0,0.7)");
 			
+			//Char center
+			/*Nano.context.beginPath();
+			Nano.context.moveTo(0,chr.pos[1]);
+			Nano.context.lineTo(Nano.canvas.width,chr.pos[1]);
+			Nano.context.moveTo(chr.pos[0], 0);
+			Nano.context.lineTo(chr.pos[0], Nano.canvas.height);
+			Nano.context.stroke();*/
+			/*
 			//LeftArm
 			Nano.Draw.image(ir, f*-5 + f*i,
-				chr.pos[0] + (dr.pos[0]*f || 0) + (f < 0 ? -10 : 32), chr.pos[1] + (dr.pos[1]*f || 0) - 8,
-				(dr.axis[0]*f || 16), (dr.axis[1]*f || 16));
+				chr.pos[0] + (dr.pos[0]*f || 0) + (f < 0 ? -34 : 16), chr.pos[1] + (dr.pos[1]*f || 0) - 8,
+				(dr.axis[0]*f || 16), (dr.axis[1]*f || 16), f < 0, s);
 			
 			//Legs
 			Nano.Draw.image(il, 0,
-				chr.pos[0] + (dl.pos[0]*f || 0) + (f > 0 ? 10 : -10), chr.pos[1] + ib.height / 2 + (dl.pos[1]*f || 0) - 10,
-				(dl.axis[0]*f || 0), (dl.axis[1]*f || 0), f < 0);
+				chr.pos[0] + (dl.pos[0]*f || 0) + (f > 0 ? 10 : -10), chr.pos[1] + ib.height*s / 2 + (dl.pos[1]*f || 0) - 10,
+				(dl.axis[0]*f || 0), (dl.axis[1]*f || 0), f < 0, s);
 				
 			//Body
 			Nano.Draw.image(ib, 0,
-				chr.pos[0] + (dt.pos[0]*f || 0), chr.pos[1] + (dt.pos[1]*f || 0) + (i/2),
-				ib.width / 2  + (dt.axis[0]*f || 0), ib.height / 2 + (dt.axis[0]*f || 0));
+				chr.pos[0] - (ib.width*s/2) + (dt.pos[0]*f || 0), chr.pos[1] + (dt.pos[1]*f || 0) + (i/2),
+				ib.width*s / 2  + (dt.axis[0]*f || 0), ib.height*s / 2 + (dt.axis[0]*f || 0), f < 0, s);
 				
 			//Legs
 			Nano.Draw.image(il, 0,
-				chr.pos[0] + (dl.pos[0]*f || 0) + (f < 0 ? 20 : -20), chr.pos[1] + ib.height / 2 + (dl.pos[1]*f || 0) - 10,
-				(dl.axis[0]*f || 0), (dl.axis[1]*f || 0), f < 0);
+				chr.pos[0] + (dl.pos[0]*f || 0) + (f < 0 ? 20 : -20), chr.pos[1] + ib.height*s / 2 + (dl.pos[1]*f || 0) - 10,
+				(dl.axis[0]*f || 0), (dl.axis[1]*f || 0), f < 0, s);
 				
 			//RightArm
 			Nano.Draw.image(ir, f*(5 - i),
-				chr.pos[0] + (dr.pos[0]*f || 0) + (f > 0 ? -5 : 25), chr.pos[1] + (dr.pos[1]*f || 0) - 8,
-				(dr.axis[0]*f || 16), (dr.axis[1]*f || 16));
+				chr.pos[0] + (dr.pos[0]*f || 0) + (f > 0 ? -5 : 10), chr.pos[1] + (dr.pos[1]*f || 0) - 8,
+				(dr.axis[0]*f || 16), (dr.axis[1]*f || 16), f < 0, s);
 				
 			//Head
 			Nano.Draw.image(ih, i/2*f,
-				chr.pos[0] + (dh.pos[0]*f || 0), chr.pos[1] - (ib.height / 1.5) + (dh.pos[1]*f || 0) + i,
-				ih.width / 2  + (dh.axis[0]*f || 0), ih.height / 2 + (dh.axis[0]*f || 0));
+				chr.pos[0] - (ih.width*s/2) + (dh.pos[0]*f || 0), chr.pos[1] - (ih.height*s/2) - (ib.height*s/2) + (dh.pos[1]*f || 0) + i,
+				ih.width*s / 2  + (dh.axis[0]*f || 0), ih.height*s / 2 + (dh.axis[0]*f || 0), f < 0, s);
 				
 			//Eyes
 			Nano.Draw.image(iy, i/2*f,
-				chr.pos[0] + (dy.pos[0]*f || 0) + (f * iy.width / 2), chr.pos[1] - ((ib.height / 1.5) - ih.height / 2) + (dy.pos[1]*f || 0) + i,
-				iy.width / 2  + (dy.axis[0]*f || 0), ih.height / 2 + (dy.axis[0]*f || 0), f < 0);
+				chr.pos[0] + (dy.pos[0]*f || 0) + (f * iy.width*s / 2), chr.pos[1] - ((ib.height*s / 1.5) - ih.height*s / 2) + (dy.pos[1]*f || 0) + i,
+				iy.width*s / 2  + (dy.axis[0]*f || 0), ih.height*s / 2 + (dy.axis[0]*f || 0), f < 0);
 				
 			//Mouth
 			Nano.Draw.image(im, i/2*f,
-				chr.pos[0] + (dm.pos[0]*f || 0) + (f * im.width), chr.pos[1] - ((ib.height / 1.5) - ih.height / 2) + iy.height + (dm.pos[1]*f || 0) + i,
-				im.width / 2  + (dm.axis[0]*f || 0), ih.height / 2 + (dm.axis[0]*f || 0), f < 0);
+				chr.pos[0] + (dm.pos[0]*f || 0) + (f * im.width*s), chr.pos[1] - ((ib.height*s / 1.5) - ih.height*s / 2) + iy.height*s + (dm.pos[1]*f || 0) + i,
+				im.width*s / 2  + (dm.axis[0]*f || 0), ih.height*s / 2 + (dm.axis[0]*f || 0), f < 0);
 				
 			//Hair
 			Nano.Draw.image(ia, i/2*f,
-				chr.pos[0] + (da.pos[0]*f || 0), chr.pos[1] - (ib.height / 1.5) + (da.pos[1]*f || 0) - 15 + i,
-				ia.width / 2  + (da.axis[0]*f || 0), ih.height / 2 + (da.axis[0]*f || 0), f < 0);
+				chr.pos[0] + (da.pos[0]*f || 0), chr.pos[1] - (ib.height*s / 1.5) + (da.pos[1]*f || 0) - 15 + i,
+				ia.width*s / 2  + (da.axis[0]*f || 0), ih.height*s / 2 + (da.axis[0]*f || 0), f < 0);
+				*/
+				
+			if(f > 0) {
+				//LeftArm
+				Nano.Draw.image(ir, f*-5 + f*i,
+					chr.pos[0] + (ib.width*s/3), chr.pos[1] - (ib.height*s/2) + 10,
+					ir.width*s/2, ir.width*s/2, f < 0, s);
+			} else {
+				//RightArm
+				Nano.Draw.image(ir, f*(5 - i),
+					chr.pos[0] - (ib.width*s/3), chr.pos[1] - (ib.height*s/2) + 10,
+					(dr.axis[0]*f || 16), (dr.axis[1]*f || 16), f < 0, s);
+			}
+			
+			//Legs
+			Nano.Draw.image(il, 0,
+				chr.pos[0] + (ib.width*s/2) - (f < 0 ? 10 : 0), chr.pos[1] + (ib.height*s/2) - (il.height*s*1/3),
+				il.width/2, 0, f < 0, s);
+				
+			//Body
+			Nano.Draw.image(ib, 0,
+				chr.pos[0], chr.pos[1] + (i/2),
+				ib.width/2, ib.height/2, f < 0, s);
+				
+			//Legs
+			Nano.Draw.image(il, 0,
+				chr.pos[0] - (ib.width*s/2) + (f > 0 ? 10 : 0), chr.pos[1] + (ib.height*s/2) - (il.height*s*1/3),
+				il.width/2, 0, f < 0, s);
+				
+			if(f < 0) {
+				//LeftArm
+				Nano.Draw.image(ir, f*-5 + f*i,
+					chr.pos[0] + (ib.width*s/3), chr.pos[1] - (ib.height*s/2) + 10,
+					ir.width*s/2, ir.width*s/2, f < 0, s);
+			} else {
+				//RightArm
+				Nano.Draw.image(ir, f*(5 - i),
+					chr.pos[0] - (ib.width*s/3), chr.pos[1] - (ib.height*s/2) + 10,
+					(dr.axis[0]*f || 16), (dr.axis[1]*f || 16), f < 0, s);
+			}
+				
+			//Head
+			Nano.Draw.image(ih, i/2*f,
+				chr.pos[0], chr.pos[1] - (ib.height*s/2) + 10 + i,
+				ih.width / 2, ih.height, f < 0, s);
+				
+			//Eyes
+			Nano.Draw.image(iy, i/2*f,
+				chr.pos[0] + iy.width*s*f, chr.pos[1] - (ih.height*s/6) + i,
+				iy.width*s/2, ih.height*s/2, f < 0, (dy.scale || 1));
+				
+			//Mouth
+			Nano.Draw.image(im, i/2*f,
+				chr.pos[0] + iy.width*(dy.scale || 1)*f, chr.pos[1] - (ih.height*s/8) + iy.height*(dy.scale || 1) + i,
+				iy.width*(dy.scale || 1)/2, ih.height*s/2, f < 0);
+				
+			//Hair
+			Nano.Draw.image(ia, i/2*f,
+				chr.pos[0] + (da.pos[0]*f || 0), chr.pos[1] - (ih.height*s) + (da.pos[1]*f || 0) + i,
+				ia.width/2 + (da.axis[0]*f || 0), 30 + (da.axis[1]*f || 0), f < 0);
 		}
 	}
 };
