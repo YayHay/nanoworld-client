@@ -121,7 +121,8 @@ var Nano = {
 				parts: parts,
 				traits: traits,
 				pos: pos,
-				facing: (facing || 1)
+				facing: (facing || 1),
+				animation: 0
 			};
 			return true;
 		},
