@@ -24,10 +24,12 @@
 				canvas.height = window.innerHeight;
 				
 				Nano.Render.init(canvas);
-				Nano.Render.World.load("hub");
-				Nano.Render.Characters.create("Test", {body: 1, head: 1, eyes: 1, mouth: 1, hair: 1, arms: 1, legs: 1}, [], [125, 125], 1);
-				
-				Nano.Render.Characters.walkTo("Test", window.innerWidth / 2, window.innerHeight / 2);
+				Nano.Multi.connect(function() {
+					console.log("Connected");
+					Nano.Multi.Auth.login("test", "test", function(success) {
+						Nano.Multi.Game.World.loadPublic("test");
+					});
+				});
 				
 				canvas.addEventListener('click', function(event) {
 					var rect = canvas.getBoundingClientRect();
