@@ -26,8 +26,9 @@
 				Nano.Render.init(canvas);
 				Nano.Multi.connect(function() {
 					console.log("Connected");
-					Nano.Multi.Auth.login("test", "test", function(success) {
+					Nano.Multi.Auth.login("u" + new Date().getTime(), "password", function(success) {
 						Nano.Multi.Game.World.loadPublic("test");
+						Nano.Multi.Game.Player.joinPublicWorld("test");
 					});
 				});
 				

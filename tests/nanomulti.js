@@ -13,6 +13,7 @@ Nano.Multi = {
 	fails: 0,
 	guid: null,
 	Callbacks: {},
+	players: {},
 	
 	connect: function(server, callback) {
 		server = server || Nano.Multi.defaultServer;
@@ -36,13 +37,16 @@ Nano.Multi = {
 		Nano.Multi.ws.onmessage = function(e) {
 			var d = JSON.parse(e.data);
 			console.log("RCV: " + e.data);
-			if(d.subject === "connection" && d.status === "success")
+			if(d.subject == "connection" && d.status == "success")
 				Nano.Multi.guid = d.data.guid;
-			else if(d.subject === "login") {
+			else if(d.subject == "login") {
 				Nano.Multi.Callbacks.login(d.status);
-			} else if(d.subject === "world") {
-				if(d.status === "success")
+			} else if(d.subject == "world") {
+				if(d.status == "success")
 					Nano.Render.world = d.data;
+			} else if(d.subject == "list") {
+				if(d.status == "success")
+					Nano.Multi.players = d.data;
 			}
 		};
 	},
@@ -60,10 +64,15 @@ Nano.Multi = {
 		World: {
 			loadPublic: function(name) {
 				Nano.Multi.sendPacket("get", {get: "world", type: "public", name: name});
+			},
+			listPlayersPublic: function(name) {
+				Nano.Multi.sendPacket("list", {list: "players", world: {type: "public", name: name}});
 			}
 		},
 		Player: {
-			
+			joinPublicWorld: function(name) {
+				Nano.Multi.sendPacket("enter", {type: "public", name: name});
+			}
 		}
 	}
 }
