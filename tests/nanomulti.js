@@ -45,8 +45,31 @@ Nano.Multi = {
 				if(d.status == "success")
 					Nano.Render.world = d.data;
 			} else if(d.subject == "list") {
-				if(d.status == "success")
+				if(d.status == "success") {
 					Nano.Multi.players = d.data;
+					var playersNow = [],
+						playersNew = [],
+						tmp = {};
+						
+					for(var c in Nano.Render.characters)
+						playersNow.push(c);
+					
+					for(var p = 0; p < d.data.length; p++) {
+						playersNew.push(d.data[p].uname);
+						tmp[d.data[p].uname] = p;
+					}
+					
+					var add = playersNew.filter(function(i) {return playersNow.indexOf(i) < 0;});
+					var sub = playersNow.filter(function(i) {return playersNew.indexOf(i) < 0;});
+					
+					for(var i = 0; i < sub.length; i++) {
+						Nano.Render.Characters.destroy(sub[i]);
+					}
+					for(var i = 0; i < add.length; i++) {
+						var c = d.data[tmp[add[i]]];
+						Nano.Render.Characters.create(add[i], c.character.parts, c.character.traits, c.pos, c.facing);
+					}
+				}
 			}
 		};
 	},
@@ -72,6 +95,13 @@ Nano.Multi = {
 		Player: {
 			joinPublicWorld: function(name) {
 				Nano.Multi.sendPacket("enter", {type: "public", name: name});
+			},
+			moveTo: function(x, y) {
+				if(typeof x === "object") {
+					y = x[1];
+					x = x[0];
+				}
+				Nano.Multi.sendPacket("move", {pos: [x, y]});
 			}
 		}
 	}

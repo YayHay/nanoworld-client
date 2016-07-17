@@ -29,6 +29,7 @@
 					Nano.Multi.Auth.login("u" + new Date().getTime(), "password", function(success) {
 						Nano.Multi.Game.World.loadPublic("test");
 						Nano.Multi.Game.Player.joinPublicWorld("test");
+						Nano.Multi.Game.World.listPlayersPublic("test");
 					});
 				});
 				
