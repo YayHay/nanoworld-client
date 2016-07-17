@@ -4,6 +4,6 @@ Client side part of the nanoworld game. Incldudes images, sketches and occasiona
 
 Check out the server side at [github/nanoworld](https://github.com/YayHay/nanoworld)
 
-Demo website can be found [here](http://nanoworld.esy.es)
+Files in the /web/ directory will be automatically pushed [here](http://nanoworld.esy.es)
 
-All images copyright (c) 2016 YayHay.
+Copyright (c) 2016 YayHay.
