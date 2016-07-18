@@ -238,7 +238,8 @@ Nano.Render = {
 	},
 	Draw: {
 		clear: function() {
-			Nano.Render.canvas.width = Nano.Render.canvas.width;
+			//Nano.Render.canvas.width = Nano.Render.canvas.width;
+			Nano.Render.context.clearRect(0, 0, canvas.width, canvas.height);
 			//Nano.Render.context.fillStyle = "white";
 			//Nano.Render.context.fillRect(0, 0, Nano.Render.canvas.width, Nano.Render.canvas.height);
 		},
