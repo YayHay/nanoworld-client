@@ -38,7 +38,7 @@
 					var x = event.clientX - rect.left;
 					var y = event.clientY - rect.top;
 					
-					Nano.Render.Characters.walkTo("Test", x, y);
+					Nano.Multi.Game.Player.moveTo(x, y);
 				});
 				canvas.addEventListener('mousemove', function(e) {
 					var rect = canvas.getBoundingClientRect();

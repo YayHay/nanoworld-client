@@ -70,6 +70,14 @@ Nano.Multi = {
 						Nano.Render.Characters.create(add[i], c.character.parts, c.character.traits, c.pos, c.facing);
 					}
 				}
+			} else if(d.subject == "player") {
+				if(d.status == "joined") {
+					Nano.Render.Characters.create(d.data.uname, d.data.character.parts, d.data.character.traits, d.data.pos, d.data.facing);
+				}
+			} else if(d.subject == "move") {
+				if(d.status == "update") {
+					Nano.Render.Characters.walkTo(d.data.uname, d.data.pos);
+				}
 			}
 		};
 	},
