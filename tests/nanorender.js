@@ -174,6 +174,8 @@ Nano.Render = {
 			
 			Nano.Render.Characters.moveTo(name, 0, x, t);
 			Nano.Render.Characters.moveTo(name, 1, y, t);
+			Nano.Render.Characters.Animate.walk(name, false);
+			Nano.Render.Characters.Animate.walk(name, true);
 		},
 		moveTo: function(name, axis, val, duration) {
 			// The calculations required for the step function
@@ -199,8 +201,6 @@ Nano.Render = {
 			};
 
 			// Start the animation
-			Nano.Render.Characters.Animate.walk(name, false);
-			Nano.Render.Characters.Animate.walk(name, true);
 			return step();
 		},
 		Animate: {
